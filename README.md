@@ -1,5 +1,12 @@
 # js-cloudip
 
+[![npm version](https://img.shields.io/npm/v/js-cloudip.svg)](https://www.npmjs.com/package/js-cloudip)
+[![npm downloads](https://img.shields.io/npm/dm/js-cloudip.svg)](https://www.npmjs.com/package/js-cloudip)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/js-cloudip)](https://bundlephobia.com/package/js-cloudip)
+[![CI](https://github.com/rezmoss/js-cloudip/actions/workflows/ci.yml/badge.svg)](https://github.com/rezmoss/js-cloudip/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![types](https://img.shields.io/npm/types/js-cloudip)](https://www.npmjs.com/package/js-cloudip)
+
 Fast cloud-provider IP detection for Node.js and the browser — the JavaScript port of [go-cloudip](https://github.com/rezmoss/go-cloudip).
 
 Determine if an IP belongs to **AWS, GCP, Azure, Cloudflare, DigitalOcean, or Oracle Cloud**, with sub-millisecond lookups using a binary CIDR trie. Plus a forward-lookup mode JS apps actually want: *"give me every Cloudflare CIDR."*
