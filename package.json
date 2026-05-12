@@ -1,0 +1,81 @@
+{
+  "name": "js-cloudip",
+  "version": "0.1.0",
+  "description": "Look up cloud provider IP ranges (AWS, GCP, Azure, Cloudflare, and 20+ more) in Node and the browser. Forward lookup (provider → IPs) and reverse lookup (IP → provider).",
+  "keywords": [
+    "cloud",
+    "ip",
+    "ip-ranges",
+    "cloud-ip",
+    "cloud-ip-ranges",
+    "cloud-provider-ips",
+    "aws",
+    "gcp",
+    "azure",
+    "cloudflare",
+    "fastly",
+    "cidr",
+    "geoip",
+    "reverse-lookup"
+  ],
+  "license": "MIT",
+  "author": "Rez Moss",
+  "homepage": "https://github.com/rezmoss/js-cloudip",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rezmoss/js-cloudip.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rezmoss/js-cloudip/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./embedded": {
+      "types": "./dist/embedded.d.ts",
+      "import": "./dist/embedded.js",
+      "require": "./dist/embedded.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "cloudip": "./bin/cli.js"
+  },
+  "files": [
+    "dist",
+    "data/cloudip.msgpack.gz",
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .ts",
+    "fetch-data": "tsx scripts/fetch-data.ts",
+    "prepublishOnly": "npm run fetch-data && npm run build && npm test"
+  },
+  "dependencies": {
+    "@msgpack/msgpack": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsup": "^8.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.2.0"
+  }
+}
