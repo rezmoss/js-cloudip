@@ -1,6 +1,6 @@
 {
   "name": "js-cloudip",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Look up cloud provider IP ranges (AWS, GCP, Azure, Cloudflare, and 20+ more) in Node and the browser. Forward lookup (provider → IPs) and reverse lookup (IP → provider).",
   "keywords": [
     "cloud",
