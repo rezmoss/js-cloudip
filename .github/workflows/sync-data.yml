@@ -44,9 +44,22 @@ jobs:
           new_version=$(npm version patch -m "chore(release): %s (cloudip-db ${data_version})")
           git push origin HEAD --tags
           echo "version=${new_version}" >> "$GITHUB_OUTPUT"
+          echo "data_version=${data_version}" >> "$GITHUB_OUTPUT"
       - if: steps.changes.outputs.changed == 'true'
         run: npm run build
       - if: steps.changes.outputs.changed == 'true'
         run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - if: steps.changes.outputs.changed == 'true'
+        name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.bump.outputs.version }}
+          DATA_VERSION: ${{ steps.bump.outputs.data_version }}
+        run: |
+          npm_version="${VERSION#v}"
+          gh release create "${VERSION}" \
+            --title "${VERSION}" \
+            --verify-tag \
+            --notes "$(printf 'Automated weekly release synced with the cloudip-db data snapshot **%s**.\n\n- Refreshed bundled cloud provider IP ranges (`data/cloudip.msgpack.gz`)\n- Published to npm: [`js-cloudip@%s`](https://www.npmjs.com/package/js-cloudip/v/%s)\n\nInstall: `npm install js-cloudip@%s`' "${DATA_VERSION}" "${npm_version}" "${npm_version}" "${npm_version}")"
