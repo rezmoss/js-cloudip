@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
       - run: npm ci
       - run: npm run fetch-data
@@ -28,36 +28,48 @@ jobs:
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
-      - if: steps.changes.outputs.changed == 'false'
-        run: echo "no upstream data changes; exiting"
       - if: steps.changes.outputs.changed == 'true'
         run: npm test
       - if: steps.changes.outputs.changed == 'true'
         name: Bump patch, commit, tag
-        id: bump
         run: |
           data_version=$(node -e "console.log(require('./data/version.json').version)")
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add data
           git commit -m "chore(data): sync cloudip-db ${data_version}"
-          new_version=$(npm version patch -m "chore(release): %s (cloudip-db ${data_version})")
+          npm version patch -m "chore(release): %s (cloudip-db ${data_version})"
           git push origin HEAD --tags
-          echo "version=${new_version}" >> "$GITHUB_OUTPUT"
+      # Gate publish on "is this version already on npm" rather than on the data
+      # diff, so a rerun after a failed publish recovers instead of skipping.
+      - id: pub
+        name: Check whether current version needs publishing
+        run: |
+          pkg_version=$(node -e "console.log(require('./package.json').version)")
+          data_version=$(node -e "console.log(require('./data/version.json').version)")
+          if npm view "js-cloudip@${pkg_version}" version >/dev/null 2>&1; then
+            echo "js-cloudip@${pkg_version} already on npm; nothing to publish"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "version=v${pkg_version}" >> "$GITHUB_OUTPUT"
           echo "data_version=${data_version}" >> "$GITHUB_OUTPUT"
-      - if: steps.changes.outputs.changed == 'true'
+      - if: steps.pub.outputs.publish == 'true'
         run: npm run build
-      - if: steps.changes.outputs.changed == 'true'
+      - if: steps.pub.outputs.publish == 'true'
         run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - if: steps.changes.outputs.changed == 'true'
+      - if: steps.pub.outputs.publish == 'true'
         name: Create GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ steps.bump.outputs.version }}
-          DATA_VERSION: ${{ steps.bump.outputs.data_version }}
+          VERSION: ${{ steps.pub.outputs.version }}
+          DATA_VERSION: ${{ steps.pub.outputs.data_version }}
         run: |
+          if gh release view "${VERSION}" >/dev/null 2>&1; then
+            echo "release ${VERSION} already exists; skipping"
+            exit 0
+          fi
           npm_version="${VERSION#v}"
           gh release create "${VERSION}" \
             --title "${VERSION}" \
